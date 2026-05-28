@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chord Lock</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF8F3;
+    --ink: #1A1714;
+    --ink-muted: #6B6560;
+    --amber: #D4780A;
+    --amber-light: #FDF3E3;
+    --amber-mid: #F5A623;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --border: rgba(26,23,20,0.12);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+  .serif { font-family: 'Instrument Serif', serif; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2.5rem;
+    background: rgba(250,248,243,0.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: 'Instrument Serif', serif; font-size: 1.3rem; color: var(--ink); letter-spacing: -0.02em; }
+  .logo span { color: var(--amber); }
+  nav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+  nav a { text-decoration: none; font-size: 0.875rem; font-weight: 400; color: var(--ink-muted); transition: color 0.2s; }
+  nav a:hover { color: var(--ink); }
+  .nav-cta { background: var(--ink) !important; color: var(--cream) !important; padding: 0.5rem 1.25rem; border-radius: 100px; font-weight: 500 !important; transition: background 0.2s !important; }
+  .nav-cta:hover { background: var(--amber) !important; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 8rem 2rem 4rem; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,120,10,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--amber-light); color: var(--amber);
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.35rem 1rem; border-radius: 100px; border: 1px solid rgba(212,120,10,0.2);
+    margin-bottom: 2rem; animation: fadeUp 0.6s ease both;
+  }
+  .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+  h1 {
+    font-family: 'Instrument Serif', serif; font-size: clamp(3rem, 8vw, 5.5rem);
+    font-weight: 400; line-height: 1.05; letter-spacing: -0.03em; color: var(--ink);
+    margin-bottom: 1.5rem; animation: fadeUp 0.6s 0.1s ease both;
+  }
+  h1 em { font-style: italic; color: var(--amber); }
+  .hero-sub { font-size: 1.15rem; font-weight: 300; color: var(--ink-muted); max-width: 480px; margin: 0 auto 2.5rem; animation: fadeUp 0.6s 0.2s ease both; }
+  .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.6s 0.3s ease both; }
+  .btn-primary { background: var(--ink); color: var(--cream); border: none; padding: 0.875rem 2rem; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s; text-decoration: none; display: inline-block; }
+  .btn-primary:hover { background: var(--amber); transform: translateY(-1px); }
+  .btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--border); padding: 0.875rem 2rem; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 400; cursor: pointer; transition: border-color 0.2s, transform 0.15s; text-decoration: none; display: inline-block; }
+  .btn-secondary:hover { border-color: var(--ink); transform: translateY(-1px); }
+  .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.4rem; color: var(--ink-muted); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; animation: fadeUp 1s 0.8s ease both; }
+  .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--ink-muted), transparent); animation: scrollDown 1.5s 1s ease-in-out infinite; }
+  @keyframes scrollDown { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+  /* DEMO MOCKUP */
+  .demo-section { padding: 4rem 2rem 6rem; max-width: 900px; margin: 0 auto; }
+  .app-mockup { background: white; border-radius: 20px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 20px 60px rgba(26,23,20,0.08); animation: fadeUp 0.8s 0.4s ease both; }
+  .mockup-bar { background: #F5F3EE; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #FF5F57; } .dot-y { background: #FFBD2E; } .dot-g { background: #28C840; }
+  .mockup-title { margin: 0 auto; font-size: 0.8rem; color: var(--ink-muted); font-weight: 400; }
+  .mockup-body { padding: 1.75rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; min-height: 380px; }
+  .lyrics-panel { display: flex; flex-direction: column; gap: 1rem; }
+  .panel-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+  .lyrics-area { flex: 1; background: var(--cream); border-radius: 10px; padding: 1.25rem; font-family: 'Instrument Serif', serif; font-size: 1.05rem; line-height: 2.2; color: var(--ink); border: 1px solid var(--border); }
+  .lyric-line { display: block; }
+  .chord-marker { display: inline-flex; align-items: center; justify-content: center; background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.65rem; font-weight: 500; padding: 0.15rem 0.45rem; border-radius: 4px; margin-right: 0.25rem; vertical-align: middle; position: relative; top: -2px; cursor: pointer; transition: background 0.15s; letter-spacing: 0.02em; }
+  .chord-marker.locked { background: var(--teal); }
+  .chord-marker.suggested { background: transparent; color: var(--amber); border: 1.5px dashed var(--amber); }
+  .chord-panel { display: flex; flex-direction: column; gap: 1rem; }
+  .chord-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .chord-card { background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.6rem 0.5rem; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .chord-card:hover { border-color: var(--ink); background: white; }
+  .chord-card.locked-card { border-color: var(--teal); background: var(--teal-light); }
+  .chord-card.locked-card .chord-name { color: var(--teal); }
+  .chord-name { font-family: 'Instrument Serif', serif; font-size: 1.05rem; color: var(--ink); display: block; }
+  .chord-type { font-size: 0.6rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .chord-diagram { width: 100%; height: 52px; margin-bottom: 0.2rem; }
+  .status-bar { background: var(--amber-light); border: 1px solid rgba(212,120,10,0.2); border-radius: 8px; padding: 0.6rem 0.875rem; font-size: 0.78rem; color: var(--amber); font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+  .tuning-badge { display: inline-flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tuning-pill { background: var(--amber-light); color: var(--amber); font-size: 0.7rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 100px; border: 1px solid rgba(212,120,10,0.2); }
+
+  /* FEATURES */
+  .features { background: white; padding: 6rem 2rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .section-label { text-align: center; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 1rem; }
+  .section-title { font-family: 'Instrument Serif', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; text-align: center; color: var(--ink); line-height: 1.15; margin-bottom: 4rem; letter-spacing: -0.02em; }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; max-width: 900px; margin: 0 auto; }
+  .feature-card { padding: 1.75rem; border-radius: 16px; border: 1px solid var(--border); background: var(--cream); transition: transform 0.2s, border-color 0.2s; }
+  .feature-card:hover { transform: translateY(-3px); border-color: rgba(26,23,20,0.25); }
+  .feature-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 1rem; }
+  .feature-card h3 { font-family: 'Instrument Serif', serif; font-size: 1.2rem; font-weight: 400; color: var(--ink); margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+  .feature-card p { font-size: 0.875rem; color: var(--ink-muted); line-height: 1.6; }
+
+  /* HOW IT WORKS */
+  .how { padding: 6rem 2rem; max-width: 700px; margin: 0 auto; text-align: center; }
+  .steps { display: flex; flex-direction: column; gap: 0; margin-top: 3rem; text-align: left; }
+  .step { display: flex; gap: 1.5rem; padding-bottom: 2.5rem; position: relative; }
+  .step:not(:last-child)::after { content: ''; position: absolute; left: 19px; top: 44px; bottom: 0; width: 1px; background: var(--border); }
+  .step-num { width: 40px; height: 40px; min-width: 40px; border-radius: 50%; background: var(--ink); color: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 500; }
+  .step h4 { font-family: 'Instrument Serif', serif; font-size: 1.15rem; font-weight: 400; color: var(--ink); margin-bottom: 0.35rem; letter-spacing: -0.01em; }
+  .step p { font-size: 0.875rem; color: var(--ink-muted); line-height: 1.6; }
+
+  /* CTA */
+  .cta-section { background: var(--ink); padding: 6rem 2rem; text-align: center; }
+  .cta-section h2 { font-family: 'Instrument Serif', serif; font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 400; color: var(--cream); letter-spacing: -0.03em; margin-bottom: 1rem; line-height: 1.1; }
+  .cta-section h2 em { color: var(--amber-mid); font-style: italic; }
+  .cta-sub { color: rgba(250,248,243,0.6); font-size: 1rem; max-width: 400px; margin: 0 auto 2.5rem; }
+  .btn-light { background: var(--cream); color: var(--ink); border: none; padding: 0.875rem 2rem; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s; text-decoration: none; display: inline-block; }
+  .btn-light:hover { background: var(--amber-mid); color: white; transform: translateY(-1px); }
+  footer { background: var(--ink); border-top: 1px solid rgba(250,248,243,0.1); padding: 2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  footer .logo { color: var(--cream); font-size: 1rem; }
+  footer p { font-size: 0.8rem; color: rgba(250,248,243,0.4); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .waveform { display: flex; align-items: center; gap: 2px; height: 20px; }
+  .wave-bar { width: 3px; background: var(--amber); border-radius: 2px; animation: wave 0.8s ease-in-out infinite; }
+  .wave-bar:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .wave-bar:nth-child(2) { height: 12px; animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { height: 18px; animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { height: 10px; animation-delay: 0.3s; }
+  .wave-bar:nth-child(5) { height: 14px; animation-delay: 0.15s; }
+  @keyframes wave { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+
+  #waitlist-msg { font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; margin-top: 0.75rem; color: var(--amber-mid); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Chord <span>Lock</span></div>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#waitlist" class="nav-cta">Join waitlist</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">
+    <div class="hero-dot"></div>
+    Built for songwriters
+  </div>
+  <h1>Find your chords.<br><em>Lock what sings.</em></h1>
+  <p class="hero-sub">Hum a melody, mark your chord changes, and let the app narrow down what fits — then lock the ones you love.</p>
+  <div class="hero-actions">
+    <a href="#waitlist" class="btn-primary">Join the waitlist</a>
+    <a href="#demo" class="btn-secondary">See how it works ↓</a>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- DEMO MOCKUP -->
+<section class="demo-section" id="demo">
+  <div class="app-mockup">
+    <div class="mockup-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="mockup-title">Chord Lock — standard tuning</span>
+    </div>
+    <div class="mockup-body">
+      <div class="lyrics-panel">
+        <span class="panel-label">Your lyrics</span>
+        <div class="lyrics-area">
+          <span class="lyric-line"><span class="chord-marker locked">G</span> She never calls, she never writes,</span>
+          <span class="lyric-line"><span class="chord-marker locked">Em</span> just leaves me watching empty skies</span>
+          <span class="lyric-line"><span class="chord-marker locked">C</span> on rainy nights, on rainy nights,</span>
+          <span class="lyric-line"><span class="chord-marker" id="d-marker" onclick="toggleLock(this,'d-card','D locked — suggestions narrowed')">D</span> she never calls.</span>
+          <span class="lyric-line" style="margin-top:0.4rem"><span class="chord-marker suggested" onclick="lockSuggested(this,'bm-card')">Bm?</span> Maybe well from pop lift,</span>
+          <span class="lyric-line"><span class="chord-marker suggested" onclick="lockSuggested(this,'am-card')">Am?</span> jeans stay on.</span>
+        </div>
+        <div id="demo-status" class="status-bar">
+          <div class="waveform"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div>
+          Humming detected — G major key suggested
+        </div>
+      </div>
+
+      <div class="chord-panel">
+        <span class="panel-label">Chord suggestions</span>
+        <div class="chord-grid">
+
+          <!-- G major: low E fret 3, A fret 2, D open, G open, B open, high E fret 3 -->
+          <div class="chord-card locked-card">
+            <svg class="chord-diagram" viewBox="0 0 54 52" xmlns="http://www.w3.org/2000/svg">
+              <!-- nut -->
+              <line x1="7" y1="6" x2="49" y2="6" stroke="#0F6E56" stroke-width="2.5"/>
+              <!-- 6 strings vertical -->
+              <line x1="7"  y1="6" x2="7"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="15.4" y1="6" x2="15.4" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="23.8" y1="6" x2="23.8" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="32.2" y1="6" x2="32.2" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="40.6" y1="6" x2="40.6" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="49"  y1="6" x2="49"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <!-- 4 fret lines -->
+              <line x1="7" y1="17" x2="49" y2="17" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="28" x2="49" y2="28" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="39" x2="49" y2="39" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="50" x2="49" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <!-- fret 2 on A string (string 2 = x=15.4, fret2 midpoint = between line1@6 and line2@17 => y=11.5... actually fret1=6-17, fret2=17-28) -->
+              <!-- G: E6 fret3, A5 fret2, D4 open, G3 open, B2 open, e1 fret3 -->
+              <circle cx="7"  cy="22.5" r="4" fill="#0F6E56"/><!-- E6 fret2 midpoint=(17+28)/2=22.5 — wait: fret 3 = between fret lines 2 and 3 = y between 28 and 39 = 33.5 -->
+              <circle cx="7"  cy="33.5" r="4" fill="#0F6E56"/><!-- E6 fret 3 -->
+              <circle cx="15.4" cy="22.5" r="4" fill="#0F6E56"/><!-- A5 fret 2 -->
+              <circle cx="49"  cy="33.5" r="4" fill="#0F6E56"/><!-- e1 fret 3 -->
+            </svg>
+            <span class="chord-name">G</span>
+            <span class="chord-type">standard</span>
+          </div>
+
+          <!-- Em: A fret2, D fret2, rest open -->
+          <div class="chord-card locked-card">
+            <svg class="chord-diagram" viewBox="0 0 54 52" xmlns="http://www.w3.org/2000/svg">
+              <line x1="7" y1="6" x2="49" y2="6" stroke="#0F6E56" stroke-width="2.5"/>
+              <line x1="7"  y1="6" x2="7"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="15.4" y1="6" x2="15.4" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="23.8" y1="6" x2="23.8" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="32.2" y1="6" x2="32.2" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="40.6" y1="6" x2="40.6" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="49"  y1="6" x2="49"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="17" x2="49" y2="17" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="28" x2="49" y2="28" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="39" x2="49" y2="39" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="50" x2="49" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <!-- Em: A5 fret2, D4 fret2 -->
+              <circle cx="15.4" cy="22.5" r="4" fill="#0F6E56"/>
+              <circle cx="23.8" cy="22.5" r="4" fill="#0F6E56"/>
+            </svg>
+            <span class="chord-name">Em</span>
+            <span class="chord-type">standard</span>
+          </div>
+
+          <!-- C: A fret3, D fret2, B fret1 — x on E6 -->
+          <div class="chord-card locked-card">
+            <svg class="chord-diagram" viewBox="0 0 54 52" xmlns="http://www.w3.org/2000/svg">
+              <line x1="7" y1="6" x2="49" y2="6" stroke="#0F6E56" stroke-width="2.5"/>
+              <line x1="7"  y1="6" x2="7"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="15.4" y1="6" x2="15.4" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="23.8" y1="6" x2="23.8" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="32.2" y1="6" x2="32.2" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="40.6" y1="6" x2="40.6" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="49"  y1="6" x2="49"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="17" x2="49" y2="17" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="28" x2="49" y2="28" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="39" x2="49" y2="39" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="50" x2="49" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <!-- x on E6 -->
+              <text x="7" y="4" text-anchor="middle" font-size="7" fill="#999">✕</text>
+              <!-- C: A5 fret3, D4 fret2, B2 fret1 -->
+              <circle cx="15.4" cy="33.5" r="4" fill="#0F6E56"/><!-- A fret3 -->
+              <circle cx="23.8" cy="22.5" r="4" fill="#0F6E56"/><!-- D fret2 -->
+              <circle cx="40.6" cy="11.5" r="4" fill="#0F6E56"/><!-- B fret1 -->
+            </svg>
+            <span class="chord-name">C</span>
+            <span class="chord-type">standard</span>
+          </div>
+
+          <!-- D: x x, D open, G fret2, B fret3, e fret2 -->
+          <div class="chord-card" id="d-card" onclick="toggleLock(document.getElementById('d-marker'),this,'D locked — suggestions narrowed')">
+            <svg class="chord-diagram" viewBox="0 0 54 52" xmlns="http://www.w3.org/2000/svg">
+              <line x1="7" y1="6" x2="49" y2="6" stroke="#999" stroke-width="1.5"/>
+              <line x1="7"  y1="6" x2="7"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="15.4" y1="6" x2="15.4" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="23.8" y1="6" x2="23.8" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="32.2" y1="6" x2="32.2" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="40.6" y1="6" x2="40.6" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="49"  y1="6" x2="49"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="17" x2="49" y2="17" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="28" x2="49" y2="28" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="39" x2="49" y2="39" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="50" x2="49" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <text x="7"  y="4" text-anchor="middle" font-size="7" fill="#999">✕</text>
+              <text x="15.4" y="4" text-anchor="middle" font-size="7" fill="#999">✕</text>
+              <!-- D: G3 fret2, B2 fret3, e1 fret2 -->
+              <circle cx="32.2" cy="22.5" r="4" fill="#1A1714"/><!-- G fret2 -->
+              <circle cx="40.6" cy="33.5" r="4" fill="#1A1714"/><!-- B fret3 -->
+              <circle cx="49"   cy="22.5" r="4" fill="#1A1714"/><!-- e fret2 -->
+            </svg>
+            <span class="chord-name">D</span>
+            <span class="chord-type">standard</span>
+          </div>
+
+          <!-- Bm: x, A fret2, D fret4, G fret4, B fret3, e fret2 -->
+          <div class="chord-card" id="bm-card">
+            <svg class="chord-diagram" viewBox="0 0 54 52" xmlns="http://www.w3.org/2000/svg">
+              <!-- starts at fret 2 — add fret number indicator -->
+              <line x1="7" y1="6" x2="49" y2="6" stroke="#999" stroke-width="1.5"/>
+              <line x1="7"  y1="6" x2="7"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="15.4" y1="6" x2="15.4" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="23.8" y1="6" x2="23.8" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="32.2" y1="6" x2="32.2" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="40.6" y1="6" x2="40.6" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="49"  y1="6" x2="49"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="17" x2="49" y2="17" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="28" x2="49" y2="28" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="39" x2="49" y2="39" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="50" x2="49" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <text x="7" y="4" text-anchor="middle" font-size="7" fill="#999">✕</text>
+              <text x="52" y="12" font-size="6" fill="#D4780A">2fr</text>
+              <!-- Bm shape: A fret2(row1), D fret4(row3), G fret4(row3), B fret3(row2), e fret2(row1) -->
+              <circle cx="15.4" cy="11.5" r="4" fill="#D4780A" opacity="0.5"/><!-- A fret2 -->
+              <circle cx="23.8" cy="33.5" r="4" fill="#D4780A" opacity="0.5"/><!-- D fret4 -->
+              <circle cx="32.2" cy="33.5" r="4" fill="#D4780A" opacity="0.5"/><!-- G fret4 -->
+              <circle cx="40.6" cy="22.5" r="4" fill="#D4780A" opacity="0.5"/><!-- B fret3 -->
+              <circle cx="49"   cy="11.5" r="4" fill="#D4780A" opacity="0.5"/><!-- e fret2 -->
+            </svg>
+            <span class="chord-name">Bm</span>
+            <span class="chord-type">suggested</span>
+          </div>
+
+          <!-- Am: x, A open, D fret2, G fret2, B fret1, e open -->
+          <div class="chord-card" id="am-card">
+            <svg class="chord-diagram" viewBox="0 0 54 52" xmlns="http://www.w3.org/2000/svg">
+              <line x1="7" y1="6" x2="49" y2="6" stroke="#999" stroke-width="1.5"/>
+              <line x1="7"  y1="6" x2="7"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="15.4" y1="6" x2="15.4" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="23.8" y1="6" x2="23.8" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="32.2" y1="6" x2="32.2" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="40.6" y1="6" x2="40.6" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="49"  y1="6" x2="49"  y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="17" x2="49" y2="17" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="28" x2="49" y2="28" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="39" x2="49" y2="39" stroke="#ccc" stroke-width="0.8"/>
+              <line x1="7" y1="50" x2="49" y2="50" stroke="#ccc" stroke-width="0.8"/>
+              <text x="7" y="4" text-anchor="middle" font-size="7" fill="#999">✕</text>
+              <!-- Am: D4 fret2, G3 fret2, B2 fret1 -->
+              <circle cx="23.8" cy="22.5" r="4" fill="#D4780A" opacity="0.5"/><!-- D fret2 -->
+              <circle cx="32.2" cy="22.5" r="4" fill="#D4780A" opacity="0.5"/><!-- G fret2 -->
+              <circle cx="40.6" cy="11.5" r="4" fill="#D4780A" opacity="0.5"/><!-- B fret1 -->
+            </svg>
+            <span class="chord-name">Am</span>
+            <span class="chord-type">suggested</span>
+          </div>
+
+        </div>
+        <div class="tuning-badge">
+          <span class="tuning-pill">Standard</span>
+          <span class="tuning-pill">Open G</span>
+          <span class="tuning-pill">DADGAD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <p class="section-label">What it does</p>
+  <h2 class="section-title">Everything a songwriter<br><em>actually</em> needs</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background: var(--amber-light);">🎤</div>
+      <h3>Hum to find chords</h3>
+      <p>Sing or hum your melody into the mic. Chord Lock detects pitch in real time and suggests chords that fit what you're hearing in your head.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: var(--teal-light);">🔒</div>
+      <h3>Lock what works</h3>
+      <p>Lock chords you love and the suggestions automatically narrow. No other tool does this — it's the feature that keeps your flow going.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: var(--coral-light);">📝</div>
+      <h3>Lyrics + chord marks</h3>
+      <p>Paste your lyrics and click to mark where chord changes happen. Clean, visual, and satisfying — like a real lead sheet.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: var(--amber-light);">🎸</div>
+      <h3>Your tuning, your diagrams</h3>
+      <p>Accurate fingering diagrams for standard, open G, DADGAD and more. See exactly where to put your fingers for your specific setup.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: var(--teal-light);">📄</div>
+      <h3>Export as PDF</h3>
+      <p>Turn your session into a clean chord chart you can print, share with your band, or file away in your songwriting archive.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: var(--coral-light);">✨</div>
+      <h3>Duolingo-simple UI</h3>
+      <p>No music degree required. Clean, friendly, step by step — building a song should feel like play, not fighting a DAW.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <p class="section-label">How it works</p>
+  <h2 class="section-title">From melody in your head<br>to chart in your hand</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h4>Paste your lyrics</h4>
+        <p>Drop in whatever you've written — a full verse, a rough sketch, even just a title. Click where you want chord changes to happen.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h4>Hum or pick chords</h4>
+        <p>Either hum the melody into your mic and let the app detect what notes you're singing, or manually pick chords from a visual grid.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h4>Lock the ones you love</h4>
+        <p>Like a chord? Lock it. The remaining suggestions automatically tighten around what's locked — so you're always building on solid ground.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <h4>Export your chart</h4>
+        <p>When it feels right, export a clean PDF chord chart with accurate fingering diagrams for your tuning. Ready to play, record, or share.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / WAITLIST -->
+<section class="cta-section" id="waitlist">
+  <h2>Your next song is<br><em>waiting to be found</em></h2>
+  <p class="cta-sub">Chord Lock is in development. Join the waitlist and be first to play.</p>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+    <input type="email" id="email-input" placeholder="your@email.com" style="padding: 0.875rem 1.25rem; border-radius: 100px; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; width: 260px; background: rgba(250,248,243,0.12); color: var(--cream); outline: none;">
+    <button class="btn-light" onclick="joinWaitlist()">Join waitlist</button>
+  </div>
+  <p id="waitlist-msg">Thanks! We'll be in touch 🎸</p>
+</section>
+
+<footer>
+  <div class="logo">Chord <span>Lock</span></div>
+  <p>Built by a songwriter, for songwriters.</p>
+  <p style="color: rgba(250,248,243,0.3); font-size: 0.75rem;">Coming soon — web &amp; mobile</p>
+</footer>
+
+<script>
+function toggleLock(marker, card, msg) {
+  if (typeof card === 'string') card = document.getElementById(card);
+  marker.classList.toggle('locked');
+  card.classList.toggle('locked-card');
+  const locked = marker.classList.contains('locked');
+  const status = document.getElementById('demo-status');
+  if (locked) {
+    status.innerHTML = '🔒 ' + msg;
+    status.style.background = 'var(--teal-light)';
+    status.style.borderColor = 'rgba(15,110,86,0.2)';
+    status.style.color = 'var(--teal)';
+    card.querySelector('.chord-name').style.color = locked ? 'var(--teal)' : '';
+  } else {
+    status.innerHTML = '<div class="waveform"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div> Humming detected — G major key suggested';
+    status.style.background = 'var(--amber-light)';
+    status.style.borderColor = 'rgba(212,120,10,0.2)';
+    status.style.color = 'var(--amber)';
+    card.querySelector('.chord-name').style.color = '';
+  }
+}
+
+function lockSuggested(marker, cardId) {
+  marker.classList.remove('suggested');
+  marker.classList.add('locked');
+  marker.textContent = marker.textContent.replace('?','');
+  const card = document.getElementById(cardId);
+  if (card) {
+    card.classList.add('locked-card');
+    card.querySelector('.chord-type').textContent = 'locked';
+    const dots = card.querySelectorAll('circle');
+    dots.forEach(d => { d.setAttribute('fill','#0F6E56'); d.setAttribute('opacity','1'); });
+    card.querySelector('.chord-name').style.color = 'var(--teal)';
+  }
+}
+
+function joinWaitlist() {
+  const val = document.getElementById('email-input').value;
+  if (val && val.includes('@')) {
+    const msg = document.getElementById('waitlist-msg');
+    msg.style.opacity = '1';
+    document.getElementById('email-input').value = '';
+    setTimeout(() => msg.style.opacity = '0', 4000);
+  }
+}
+</script>
+</body>
+</html>
